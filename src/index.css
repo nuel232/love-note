@@ -2,94 +2,74 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
-All colors MUST be HSL.
-*/
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Poppins:wght@300;400;500;600&display=swap');
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222.2 84% 4.9%;
+    /* Valentine Color Palette */
+    --background: 30 30% 98%;
+    --foreground: 340 30% 20%;
 
-    --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
+    --card: 30 30% 98%;
+    --card-foreground: 340 30% 20%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
+    --popover: 30 30% 98%;
+    --popover-foreground: 340 30% 20%;
 
-    --primary: 222.2 47.4% 11.2%;
-    --primary-foreground: 210 40% 98%;
+    /* Deep Rose Primary */
+    --primary: 340 82% 52%;
+    --primary-foreground: 0 0% 100%;
 
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    /* Soft Pink Secondary */
+    --secondary: 350 100% 88%;
+    --secondary-foreground: 340 30% 20%;
 
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 30 20% 94%;
+    --muted-foreground: 340 20% 45%;
 
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
+    /* Gold Accent */
+    --accent: 45 100% 50%;
+    --accent-foreground: 340 30% 20%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 222.2 84% 4.9%;
+    --border: 350 30% 85%;
+    --input: 350 30% 85%;
+    --ring: 340 82% 52%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
+
+    /* Custom Valentine Colors */
+    --rose-deep: 340 82% 52%;
+    --rose-soft: 350 100% 88%;
+    --rose-blush: 350 100% 95%;
+    --gold: 45 100% 50%;
+    --gold-soft: 45 100% 70%;
+    --cream: 30 30% 98%;
+    --burgundy: 340 30% 20%;
+    --ivory: 40 40% 97%;
+
+    /* Gradients */
+    --gradient-romantic: linear-gradient(135deg, hsl(350 100% 95%) 0%, hsl(350 100% 88%) 50%, hsl(340 82% 72%) 100%);
+    --gradient-hero: linear-gradient(180deg, hsl(350 100% 95%) 0%, hsl(30 30% 98%) 100%);
+    --gradient-rose: linear-gradient(135deg, hsl(340 82% 52%) 0%, hsl(350 80% 60%) 100%);
+    --gradient-gold: linear-gradient(135deg, hsl(45 100% 50%) 0%, hsl(45 100% 70%) 100%);
+    --gradient-button-yes: linear-gradient(135deg, hsl(340 82% 52%) 0%, hsl(350 70% 55%) 50%, hsl(340 82% 48%) 100%);
+    
+    /* Shadows */
+    --shadow-romantic: 0 4px 20px -5px hsla(340, 82%, 52%, 0.3);
+    --shadow-card: 0 10px 40px -10px hsla(340, 30%, 20%, 0.15);
+    --shadow-glow: 0 0 30px hsla(340, 82%, 52%, 0.4);
+    --shadow-gold-glow: 0 0 20px hsla(45, 100%, 50%, 0.4);
 
     --sidebar-background: 0 0% 98%;
-
     --sidebar-foreground: 240 5.3% 26.1%;
-
     --sidebar-primary: 240 5.9% 10%;
-
     --sidebar-primary-foreground: 0 0% 98%;
-
     --sidebar-accent: 240 4.8% 95.9%;
-
     --sidebar-accent-foreground: 240 5.9% 10%;
-
     --sidebar-border: 220 13% 91%;
-
-    --sidebar-ring: 217.2 91.2% 59.8%;
-  }
-
-  .dark {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-
-    --primary: 210 40% 98%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 212.7 26.8% 83.9%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }
@@ -99,7 +79,208 @@ All colors MUST be HSL.
     @apply border-border;
   }
 
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground font-sans antialiased;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', serif;
+  }
+}
+
+@layer components {
+  .font-display {
+    font-family: 'Playfair Display', serif;
+  }
+
+  .font-body {
+    font-family: 'Poppins', sans-serif;
+  }
+
+  /* Romantic Gradients */
+  .bg-gradient-romantic {
+    background: var(--gradient-romantic);
+  }
+
+  .bg-gradient-hero {
+    background: var(--gradient-hero);
+  }
+
+  .bg-gradient-rose {
+    background: var(--gradient-rose);
+  }
+
+  .bg-gradient-gold {
+    background: var(--gradient-gold);
+  }
+
+  /* Glow Effects */
+  .glow-rose {
+    box-shadow: var(--shadow-glow);
+  }
+
+  .glow-gold {
+    box-shadow: var(--shadow-gold-glow);
+  }
+
+  /* Card Styling */
+  .card-romantic {
+    background: hsl(var(--cream));
+    box-shadow: var(--shadow-card);
+    border: 1px solid hsl(var(--border));
+  }
+
+  /* Custom Valentine Button Styles */
+  .btn-valentine-yes {
+    @apply relative overflow-hidden px-10 py-4 rounded-full text-lg font-semibold transition-all duration-300;
+    background: var(--gradient-button-yes);
+    color: hsl(var(--primary-foreground));
+    box-shadow: var(--shadow-romantic);
+  }
+
+  .btn-valentine-yes:hover {
+    transform: scale(1.05);
+    box-shadow: var(--shadow-glow);
+  }
+
+  .btn-valentine-no {
+    @apply px-6 py-2 rounded-full text-sm font-medium transition-all duration-300;
+    background: hsl(var(--muted));
+    color: hsl(var(--muted-foreground));
+  }
+
+  .btn-valentine-no:hover {
+    background: hsl(var(--secondary));
+  }
+
+  /* Pulsing Animation */
+  .pulse-glow {
+    animation: pulseGlow 2s ease-in-out infinite;
+  }
+
+  @keyframes pulseGlow {
+    0%, 100% {
+      box-shadow: 0 0 20px hsla(340, 82%, 52%, 0.4);
+    }
+    50% {
+      box-shadow: 0 0 40px hsla(340, 82%, 52%, 0.7);
+    }
+  }
+
+  /* Floating Animation */
+  .float {
+    animation: float 3s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-10px);
+    }
+  }
+
+  /* Heart Cursor for Desktop */
+  @media (pointer: fine) {
+    .heart-cursor {
+      cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='%23E91E63'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E") 12 12, auto;
+    }
+  }
+
+  /* Invitation Card */
+  .invitation-card {
+    @apply relative p-8 md:p-12 rounded-2xl;
+    background: linear-gradient(145deg, hsl(40 40% 97%) 0%, hsl(30 30% 98%) 100%);
+    border: 2px solid hsl(45 100% 70% / 0.5);
+    box-shadow: 
+      0 20px 60px -20px hsla(340, 30%, 20%, 0.2),
+      inset 0 1px 0 hsla(45, 100%, 90%, 0.8);
+  }
+
+  .invitation-card::before {
+    content: '';
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    bottom: 8px;
+    border: 1px solid hsl(45 100% 70% / 0.3);
+    border-radius: 1rem;
+    pointer-events: none;
+  }
+
+  /* Rose petal decoration */
+  .decorative-border {
+    background-image: 
+      radial-gradient(circle at 10% 10%, hsla(340, 82%, 52%, 0.1) 0%, transparent 50%),
+      radial-gradient(circle at 90% 90%, hsla(340, 82%, 52%, 0.1) 0%, transparent 50%);
+  }
+
+  /* Loading screen rose */
+  .rose-bloom {
+    animation: bloomIn 2s ease-out forwards;
+  }
+
+  @keyframes bloomIn {
+    0% {
+      transform: scale(0) rotate(-180deg);
+      opacity: 0;
+    }
+    50% {
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1) rotate(0deg);
+      opacity: 1;
+    }
+  }
+
+  /* Shimmer effect */
+  .shimmer {
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      hsla(45, 100%, 70%, 0.3) 50%,
+      transparent 100%
+    );
+    background-size: 200% 100%;
+    animation: shimmer 2s infinite;
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
+  /* Section transitions */
+  .section-valentine {
+    @apply min-h-screen flex flex-col items-center justify-center relative overflow-hidden;
+  }
+}
+
+@layer utilities {
+  /* Text gradients */
+  .text-gradient-rose {
+    background: linear-gradient(135deg, hsl(340 82% 52%) 0%, hsl(350 70% 55%) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-gradient-gold {
+    background: linear-gradient(135deg, hsl(45 100% 45%) 0%, hsl(45 100% 60%) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 }
