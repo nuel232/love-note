@@ -23,14 +23,12 @@ const ValentineQuestion = ({ onYes }: ValentineQuestionProps) => {
 
   const handleNoHover = useCallback(() => {
     if (noAttempts >= 3) {
-      // Show modal after 3 attempts
       const randomMessage = playfulMessages[Math.floor(Math.random() * playfulMessages.length)];
       setModalMessage(randomMessage);
       setShowModal(true);
       return;
     }
 
-    // Move button to random position
     const maxX = window.innerWidth > 768 ? 200 : 100;
     const maxY = window.innerWidth > 768 ? 150 : 80;
     
@@ -42,49 +40,73 @@ const ValentineQuestion = ({ onYes }: ValentineQuestionProps) => {
     setNoAttempts(prev => prev + 1);
   }, [noAttempts]);
 
-  const handleNoClick = () => {
-    handleNoHover();
-  };
-
   return (
     <section className="section-valentine bg-gradient-hero">
+      {/* Floating Hearts Background */}
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        {Array.from({ length: 12 }).map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute"
+            style={{
+              left: `${Math.random() * 100}%`,
+              bottom: '-50px',
+            }}
+            animate={{
+              y: [0, -window.innerHeight - 100],
+              x: [0, Math.sin(i) * 50, 0],
+              rotate: [0, 360],
+              opacity: [0.3 + Math.random() * 0.4, 0.3 + Math.random() * 0.4, 0],
+            }}
+            transition={{
+              duration: 6 + Math.random() * 4,
+              delay: Math.random() * 5,
+              repeat: Infinity,
+              ease: "easeOut",
+            }}
+          >
+            <Heart 
+              className="text-primary" 
+              fill="currentColor"
+              size={12 + Math.random() * 16}
+              style={{ opacity: 0.3 + Math.random() * 0.4 }}
+            />
+          </motion.div>
+        ))}
+      </div>
+
       <div className="container mx-auto px-6 text-center relative z-10">
-        {/* Question */}
         <motion.div
           initial={{ opacity: 0, y: 50 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.8 }}
         >
-          <h2 className="font-display text-4xl md:text-6xl lg:text-7xl font-bold text-burgundy mb-4">
+          <h2 className="font-display text-5xl md:text-7xl font-bold text-burgundy mb-4">
             Will you be my
           </h2>
-          <h2 className="font-display text-5xl md:text-7xl lg:text-8xl font-bold text-gradient-rose mb-12">
+          <h2 className="font-display text-6xl md:text-8xl font-bold text-gradient-rose mb-12">
             Valentine?
           </h2>
         </motion.div>
 
-        {/* Heart decoration */}
         <motion.div
           className="flex justify-center mb-12"
           initial={{ opacity: 0, scale: 0 }}
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5, delay: 0.3 }}
-          animate={{ scale: [1, 1.15, 1] }}
         >
-          <Heart className="w-20 h-20 md:w-28 md:h-28 text-primary" fill="currentColor" />
+          <Heart className="w-24 h-24 text-primary" fill="currentColor" />
         </motion.div>
 
-        {/* Buttons */}
         <motion.div
-          className="flex flex-col md:flex-row items-center justify-center gap-6 md:gap-8"
+          className="flex flex-col md:flex-row items-center justify-center gap-8"
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.6, delay: 0.5 }}
         >
-          {/* Yes Button */}
           <motion.button
             onClick={onYes}
             className="btn-valentine-yes text-xl px-12 py-5 pulse-glow"
@@ -97,9 +119,8 @@ const ValentineQuestion = ({ onYes }: ValentineQuestionProps) => {
             </span>
           </motion.button>
 
-          {/* No Button - moves on hover/tap */}
           <motion.button
-            className="btn-valentine-no transition-all duration-300"
+            className="btn-valentine-no"
             animate={{
               x: noButtonPosition.x,
               y: noButtonPosition.y,
@@ -107,14 +128,13 @@ const ValentineQuestion = ({ onYes }: ValentineQuestionProps) => {
             }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
             onMouseEnter={handleNoHover}
-            onClick={handleNoClick}
-            onTouchStart={handleNoClick}
+            onClick={handleNoHover}
+            onTouchStart={handleNoHover}
           >
             No
           </motion.button>
         </motion.div>
 
-        {/* Hint text */}
         {noAttempts > 0 && noAttempts < 3 && (
           <motion.p
             className="mt-8 text-muted-foreground text-sm"
@@ -126,7 +146,6 @@ const ValentineQuestion = ({ onYes }: ValentineQuestionProps) => {
         )}
       </div>
 
-      {/* Modal */}
       <AnimatePresence>
         {showModal && (
           <motion.div
@@ -140,23 +159,18 @@ const ValentineQuestion = ({ onYes }: ValentineQuestionProps) => {
               initial={{ scale: 0.8, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.8, opacity: 0 }}
-              transition={{ type: "spring", damping: 20 }}
             >
               <button
                 onClick={() => setShowModal(false)}
-                className="absolute top-4 right-4 text-muted-foreground hover:text-burgundy transition-colors"
+                className="absolute top-4 right-4 text-muted-foreground hover:text-burgundy"
+                aria-label="Close modal"
               >
                 <X className="w-5 h-5" />
               </button>
 
-              <motion.div
-                animate={{ rotate: [0, 10, -10, 0] }}
-                transition={{ duration: 0.5 }}
-              >
-                <Heart className="w-16 h-16 text-primary mx-auto mb-4" fill="currentColor" />
-              </motion.div>
+              <Heart className="w-16 h-16 text-primary mx-auto mb-4" fill="currentColor" />
 
-              <h3 className="font-display text-2xl md:text-3xl font-bold text-burgundy mb-4">
+              <h3 className="font-display text-3xl font-bold text-burgundy mb-4">
                 {modalMessage}
               </h3>
 
@@ -173,9 +187,7 @@ const ValentineQuestion = ({ onYes }: ValentineQuestionProps) => {
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <span className="flex items-center gap-2">
-                  Yes! ❤️
-                </span>
+                Yes! ❤️
               </motion.button>
             </motion.div>
           </motion.div>

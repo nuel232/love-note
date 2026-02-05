@@ -6,29 +6,57 @@ interface InvitationCardProps {
   isConfirmed: boolean;
 }
 
-const InvitationCard = ({ isConfirmed }: InvitationCardProps) => {
-  const handleSaveDate = () => {
-    // Create calendar event
-    const event = {
-      title: "Valentine's Day Date 💕",
-      description: "A special Valentine's Day date at Nike Art Museum",
-      location: "Nike Art Museum, Lagos, Nigeria",
-      start: "2025-02-14T16:00:00",
-      end: "2025-02-14T20:00:00",
-    };
+// Single source of truth for event details (used for display and ICS download)
+const getEventDetails = () => {
+  const now = new Date();
+  const year = now.getFullYear();
+  let valentinesDate = new Date(year, 1, 14); // Feb 14 (month is 0-indexed)
+  if (now >= valentinesDate) {
+    valentinesDate = new Date(year + 1, 1, 14);
+  }
+  const dateStr = valentinesDate.toLocaleDateString('en-US', {
+    month: 'long',
+    day: 'numeric',
+    year: 'numeric',
+  });
+  const y = valentinesDate.getFullYear();
+  const m = String(valentinesDate.getMonth() + 1).padStart(2, '0');
+  const d = String(valentinesDate.getDate()).padStart(2, '0');
+  const icsDate = `${y}${m}${d}`;
+  return {
+    title: "Valentine's Day Date 💕",
+    description: "A special Valentine's Day date at Nike Art Museum",
+    location: "Nike Art Museum, Lagos, Nigeria",
+    locationShort: "Nike Art Museum, Lagos",
+    dateStr,
+    timeStr: "4:00 PM",
+    startIcs: `${icsDate}T160000`,
+    endIcs: `${icsDate}T200000`,
+  };
+};
 
-    // Create ICS file content
-    const icsContent = `BEGIN:VCALENDAR
-VERSION:2.0
-PRODID:-//Valentine Invitation//EN
-BEGIN:VEVENT
-DTSTART:20250214T160000
-DTEND:20250214T200000
-SUMMARY:${event.title}
-DESCRIPTION:${event.description}
-LOCATION:${event.location}
-END:VEVENT
-END:VCALENDAR`;
+const InvitationCard = ({ isConfirmed }: InvitationCardProps) => {
+  const event = getEventDetails();
+
+  const handleSaveDate = () => {
+    // ICS format requires CRLF line endings and escaped special chars
+    const escapeIcs = (str: string) =>
+      str.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
+    const crlf = '\r\n';
+
+    const icsContent = [
+      'BEGIN:VCALENDAR',
+      'VERSION:2.0',
+      'PRODID:-//Valentine Invitation//EN',
+      'BEGIN:VEVENT',
+      `DTSTART:${event.startIcs}`,
+      `DTEND:${event.endIcs}`,
+      `SUMMARY:${escapeIcs(event.title)}`,
+      `DESCRIPTION:${escapeIcs(event.description)}`,
+      `LOCATION:${escapeIcs(event.location)}`,
+      'END:VEVENT',
+      'END:VCALENDAR',
+    ].join(crlf);
 
     // Download the ICS file
     const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
@@ -38,6 +66,7 @@ END:VCALENDAR`;
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
+    URL.revokeObjectURL(link.href);
   };
 
   const handleShare = async () => {
@@ -60,6 +89,38 @@ END:VCALENDAR`;
 
   return (
     <section className="section-valentine bg-gradient-hero py-16 md:py-24">
+      {/* Floating Hearts Background */}
+<div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+  {Array.from({ length: 12 }).map((_, i) => (
+    <motion.div
+      key={i}
+      className="absolute"
+      style={{
+        left: `${Math.random() * 100}%`,
+        bottom: '-50px',
+      }}
+      animate={{
+        y: [0, -window.innerHeight - 100],
+        x: [0, Math.sin(i) * 50, 0],
+        rotate: [0, 360],
+        opacity: [0.3 + Math.random() * 0.4, 0.3 + Math.random() * 0.4, 0],
+      }}
+      transition={{
+        duration: 6 + Math.random() * 4,
+        delay: Math.random() * 5,
+        repeat: Infinity,
+        ease: "easeOut",
+      }}
+    >
+      <Heart 
+        className="text-primary" 
+        fill="currentColor"
+        size={12 + Math.random() * 16}
+        style={{ opacity: 0.3 + Math.random() * 0.4 }}
+      />
+    </motion.div>
+  ))}
+</div>
       <div className="container mx-auto px-6">
         <motion.div
           className="max-w-2xl mx-auto"
@@ -138,7 +199,7 @@ END:VCALENDAR`;
                   </div>
                   <div className="text-left">
                     <p className="text-sm text-muted-foreground">Date</p>
-                    <p className="font-semibold text-burgundy">February 14, 2025</p>
+                    <p className="font-semibold text-burgundy">{event.dateStr}</p>
                   </div>
                 </div>
 
@@ -148,7 +209,7 @@ END:VCALENDAR`;
                   </div>
                   <div className="text-left">
                     <p className="text-sm text-muted-foreground">Time</p>
-                    <p className="font-semibold text-burgundy">4:00 PM</p>
+                    <p className="font-semibold text-burgundy">{event.timeStr}</p>
                   </div>
                 </div>
               </div>
@@ -166,7 +227,7 @@ END:VCALENDAR`;
                     rel="noopener noreferrer"
                     className="font-semibold text-burgundy hover:text-primary transition-colors underline-offset-2 hover:underline"
                   >
-                    Nike Art Museum, Lagos
+                    {event.locationShort}
                   </a>
                 </div>
               </div>

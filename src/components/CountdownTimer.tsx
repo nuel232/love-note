@@ -12,11 +12,15 @@ const CountdownTimer = () => {
   const [timeLeft, setTimeLeft] = useState<TimeLeft>({ days: 0, hours: 0, minutes: 0, seconds: 0 });
 
   useEffect(() => {
-    // Valentine's Day 2025 at 4PM
-    const valentinesDay = new Date('2025-02-14T16:00:00');
-
-    const calculateTimeLeft = () => {
+    const calculateTimeLeft = (): TimeLeft => {
       const now = new Date();
+      // Target next Valentine's Day (Feb 14) at 4:00 PM
+      let year = now.getFullYear();
+      let valentinesDay = new Date(year, 1, 14, 16, 0, 0, 0);
+      if (now >= valentinesDay) {
+        valentinesDay = new Date(year + 1, 1, 14, 16, 0, 0, 0);
+      }
+
       const difference = valentinesDay.getTime() - now.getTime();
 
       if (difference > 0) {
@@ -31,8 +35,8 @@ const CountdownTimer = () => {
       return { days: 0, hours: 0, minutes: 0, seconds: 0 };
     };
 
+    // Update immediately, then every second
     setTimeLeft(calculateTimeLeft());
-
     const timer = setInterval(() => {
       setTimeLeft(calculateTimeLeft());
     }, 1000);
@@ -59,7 +63,7 @@ const CountdownTimer = () => {
         >
           <div className="bg-cream border border-gold-soft/30 rounded-lg p-3 md:p-4 min-w-[60px] md:min-w-[80px] shadow-sm">
             <motion.span
-              key={block.value}
+              key={`${block.label}-${block.value}`}
               className="font-display text-2xl md:text-4xl font-bold text-burgundy block"
               initial={{ scale: 1.1 }}
               animate={{ scale: 1 }}
