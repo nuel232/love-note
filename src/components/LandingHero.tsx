@@ -85,7 +85,7 @@ const LandingHero = ({ onContinue, showButton }: LandingHeroProps) => {
             <div className="relative w-56 h-56 md:w-72 md:h-72 rounded-full border-4 border-gold-soft bg-cream shadow-lg overflow-hidden">
               {/* Add your photo: replace src with your image path */}
               {<img 
-                src="public/Screenshot 2026-02-05 235239.png" 
+                src="public/theo-1.jpg" 
                 alt="My Valentine" 
                 className="w-full h-full object-cover"
               />}

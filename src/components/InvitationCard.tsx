@@ -178,6 +178,20 @@ const InvitationCard = ({ isConfirmed }: InvitationCardProps) => {
             <h2 className="font-display text-3xl md:text-4xl font-bold text-center text-burgundy mb-2">
               You're Cordially Invited
             </h2>
+            <motion.div
+  className="flex justify-center mb-8"
+  initial={{ opacity: 0, scale: 0.9 }}
+  animate={{ opacity: 1, scale: 1 }}
+  transition={{ delay: 0.3 }}
+>
+  <div className="w-24 h-24 rounded-full border-2 border-gold-soft overflow-hidden shadow-lg">
+    <img 
+      src="public/Screenshot 2026-02-05 235239.png"
+      alt="My Valentine"
+      className="w-full h-full object-cover"
+    />
+  </div>
+</motion.div>
             <p className="text-center text-muted-foreground mb-8">
               to a magical Valentine's Day celebration
             </p>
