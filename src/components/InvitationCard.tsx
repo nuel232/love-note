@@ -1,12 +1,12 @@
 import { motion } from 'framer-motion';
-import { Heart, MapPin, Calendar, Clock, Sparkles, Download, Share2, CheckCircle2 } from 'lucide-react';
+import { Heart, MapPin, Calendar, Clock, Sparkles, Share2, CheckCircle2, Apple } from 'lucide-react';
 import CountdownTimer from './CountdownTimer';
 
 interface InvitationCardProps {
   isConfirmed: boolean;
 }
 
-// Single source of truth for event details (used for display and ICS download)
+// Single source of truth for event details
 const getEventDetails = () => {
   const now = new Date();
   const year = now.getFullYear();
@@ -19,10 +19,13 @@ const getEventDetails = () => {
     day: 'numeric',
     year: 'numeric',
   });
-  const y = valentinesDate.getFullYear();
-  const m = String(valentinesDate.getMonth() + 1).padStart(2, '0');
-  const d = String(valentinesDate.getDate()).padStart(2, '0');
-  const icsDate = `${y}${m}${d}`;
+  
+  // Create date objects for calendar links
+  const startDate = new Date(valentinesDate);
+  startDate.setHours(16, 0, 0, 0); // 4:00 PM
+  const endDate = new Date(valentinesDate);
+  endDate.setHours(20, 0, 0, 0); // 8:00 PM
+  
   return {
     title: "Valentine's Day Date 💕",
     description: "A special Valentine's Day date at Nike Art Museum",
@@ -30,126 +33,30 @@ const getEventDetails = () => {
     locationShort: "Nike Art Museum, Lagos",
     dateStr,
     timeStr: "4:00 PM",
-    startIcs: `${icsDate}T160000`,
-    endIcs: `${icsDate}T200000`,
+    startDate,
+    endDate,
   };
 };
 
 const InvitationCard = ({ isConfirmed }: InvitationCardProps) => {
   const event = getEventDetails();
 
-  const handleSaveDate = async () => {
-    // ICS format requires CRLF line endings and escaped special chars
-    const escapeIcs = (str: string) =>
-      str.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
-    const crlf = '\r\n';
-
-    const icsContent = [
-      'BEGIN:VCALENDAR',
-      'VERSION:2.0',
-      'PRODID:-//Valentine Invitation//EN',
-      'BEGIN:VEVENT',
-      `DTSTART:${event.startIcs}`,
-      `DTEND:${event.endIcs}`,
-      `SUMMARY:${escapeIcs(event.title)}`,
-      `DESCRIPTION:${escapeIcs(event.description)}`,
-      `LOCATION:${escapeIcs(event.location)}`,
-      'END:VEVENT',
-      'END:VCALENDAR',
-    ].join(crlf);
-
-    const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-
-    const ua = navigator.userAgent;
-    const isIOS = /iPhone|iPad|iPod/i.test(ua);
-    const isAndroid = /Android/i.test(ua);
-
-    // TRY 1: Native Share API (works best on mobile)
-    if (navigator.share && navigator.canShare) {
-      try {
-        const file = new File([blob], 'valentines-date.ics', { type: 'text/calendar;charset=utf-8' });
-        const canShareFiles = navigator.canShare({ files: [file] });
-        
-        if (canShareFiles) {
-          await navigator.share({
-            title: 'Save the date 💕',
-            text: 'Add this to your calendar',
-            files: [file],
-          });
-          return;
-        }
-      } catch (error) {
-        console.log('Share failed, trying fallback:', error);
-        // Continue to fallbacks
-      }
-    }
-
-    // TRY 2: iOS-specific handling
-    if (isIOS) {
-      // Create data URL instead of blob URL for better iOS compatibility
-      const reader = new FileReader();
-      reader.onload = () => {
-        const dataUrl = reader.result as string;
-        
-        // Try opening in new window first (works better on iOS)
-        const newWindow = window.open('', '_blank');
-        if (newWindow) {
-          newWindow.document.write(`
-            <html>
-              <head>
-                <meta charset="utf-8">
-                <title>Add to Calendar</title>
-              </head>
-              <body>
-                <h2>Tap the link below to add to your calendar:</h2>
-                <a href="${dataUrl}" download="valentines-date.ics">Add Valentine's Date to Calendar</a>
-                <script>
-                  // Auto-click the link
-                  setTimeout(() => {
-                    document.querySelector('a').click();
-                  }, 500);
-                </script>
-              </body>
-            </html>
-          `);
-          newWindow.document.close();
-        } else {
-          // If popup blocked, try direct download
-          const link = document.createElement('a');
-          link.href = dataUrl;
-          link.download = 'valentines-date.ics';
-          document.body.appendChild(link);
-          link.click();
-          document.body.removeChild(link);
-        }
-      };
-      reader.readAsDataURL(blob);
-      return;
-    }
-
-    // TRY 3: Android-specific handling (redirect to Google Calendar)
-    if (isAndroid) {
-      const googleCalendarUrl =
-        'https://calendar.google.com/calendar/render' +
-        `?action=TEMPLATE` +
-        `&text=${encodeURIComponent(event.title)}` +
-        `&details=${encodeURIComponent(event.description)}` +
-        `&location=${encodeURIComponent(event.location)}` +
-        `&dates=${encodeURIComponent(`${event.startIcs}/${event.endIcs}`)}`;
-
-      window.open(googleCalendarUrl, '_blank');
-      return;
-    }
-
-    // TRY 4: Desktop fallback - download the ICS file
-    const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
-    link.download = 'valentines-date.ics';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    URL.revokeObjectURL(link.href);
+  // Format dates for Google Calendar
+  const formatDateForGoogle = (date: Date) => {
+    return date.toISOString().replace(/-|:|\.\d+/g, '');
   };
+
+  // Google Calendar URL
+  const googleCalendarUrl = 
+    'https://calendar.google.com/calendar/render' +
+    `?action=TEMPLATE` +
+    `&text=${encodeURIComponent(event.title)}` +
+    `&details=${encodeURIComponent(event.description)}` +
+    `&location=${encodeURIComponent(event.location)}` +
+    `&dates=${formatDateForGoogle(event.startDate)}/${formatDateForGoogle(event.endDate)}`;
+
+  // Apple Calendar URL (uses webcal protocol with Google Calendar endpoint)
+  const appleCalendarUrl = googleCalendarUrl.replace('https://', 'webcal://');
 
   const handleShare = async () => {
     if (navigator.share) {
@@ -163,7 +70,6 @@ const InvitationCard = ({ isConfirmed }: InvitationCardProps) => {
         console.log('Share cancelled');
       }
     } else {
-      // Fallback: copy to clipboard
       navigator.clipboard.writeText(window.location.href);
       alert('Link copied to clipboard!');
     }
@@ -172,37 +78,38 @@ const InvitationCard = ({ isConfirmed }: InvitationCardProps) => {
   return (
     <section className="section-valentine bg-gradient-hero py-16 md:py-24">
       {/* Floating Hearts Background */}
-<div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
-  {Array.from({ length: 12 }).map((_, i) => (
-    <motion.div
-      key={i}
-      className="absolute"
-      style={{
-        left: `${Math.random() * 100}%`,
-        bottom: '-50px',
-      }}
-      animate={{
-        y: [0, -window.innerHeight - 100],
-        x: [0, Math.sin(i) * 50, 0],
-        rotate: [0, 360],
-        opacity: [0.3 + Math.random() * 0.4, 0.3 + Math.random() * 0.4, 0],
-      }}
-      transition={{
-        duration: 6 + Math.random() * 4,
-        delay: Math.random() * 5,
-        repeat: Infinity,
-        ease: "easeOut",
-      }}
-    >
-      <Heart 
-        className="text-primary" 
-        fill="currentColor"
-        size={12 + Math.random() * 16}
-        style={{ opacity: 0.3 + Math.random() * 0.4 }}
-      />
-    </motion.div>
-  ))}
-</div>
+      <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+        {Array.from({ length: 12 }).map((_, i) => (
+          <motion.div
+            key={i}
+            className="absolute"
+            style={{
+              left: `${Math.random() * 100}%`,
+              bottom: '-50px',
+            }}
+            animate={{
+              y: [0, -window.innerHeight - 100],
+              x: [0, Math.sin(i) * 50, 0],
+              rotate: [0, 360],
+              opacity: [0.3 + Math.random() * 0.4, 0.3 + Math.random() * 0.4, 0],
+            }}
+            transition={{
+              duration: 6 + Math.random() * 4,
+              delay: Math.random() * 5,
+              repeat: Infinity,
+              ease: "easeOut",
+            }}
+          >
+            <Heart 
+              className="text-primary" 
+              fill="currentColor"
+              size={12 + Math.random() * 16}
+              style={{ opacity: 0.3 + Math.random() * 0.4 }}
+            />
+          </motion.div>
+        ))}
+      </div>
+
       <div className="container mx-auto px-6">
         <motion.div
           className="max-w-2xl mx-auto"
@@ -260,20 +167,22 @@ const InvitationCard = ({ isConfirmed }: InvitationCardProps) => {
             <h2 className="font-display text-3xl md:text-4xl font-bold text-center text-burgundy mb-2">
               You're Cordially Invited
             </h2>
+            
             <motion.div
-  className="flex justify-center mb-8"
-  initial={{ opacity: 0, scale: 0.9 }}
-  animate={{ opacity: 1, scale: 1 }}
-  transition={{ delay: 0.3 }}
->
-  <div className="w-24 h-24 rounded-full border-2 border-gold-soft overflow-hidden shadow-lg">
-    <img 
-      src="/Screenshot 2026-02-05 235239.png"
-      alt="My Valentine"
-      className="w-full h-full object-cover"
-    />
-  </div>
-</motion.div>
+              className="flex justify-center mb-8"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.3 }}
+            >
+              <div className="w-24 h-24 rounded-full border-2 border-gold-soft overflow-hidden shadow-lg">
+                <img 
+                  src="/Screenshot 2026-02-05 235239.png"
+                  alt="My Valentine"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </motion.div>
+            
             <p className="text-center text-muted-foreground mb-8">
               to a magical Valentine's Day celebration
             </p>
@@ -344,26 +253,50 @@ const InvitationCard = ({ isConfirmed }: InvitationCardProps) => {
               <div className="w-16 h-[1px] bg-gradient-to-l from-transparent to-border" />
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <motion.button
-                onClick={handleSaveDate}
-                className="btn-valentine-yes flex items-center justify-center gap-2"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <Download className="w-5 h-5" />
-                Save the Date
-              </motion.button>
+            {/* Add to Calendar Buttons */}
+            <div className="mb-6">
+              <p className="text-center text-sm text-muted-foreground mb-4 font-medium">
+                Add to your calendar:
+              </p>
+              <div className="flex flex-col sm:flex-row justify-center gap-3">
+                {/* Apple Calendar Button */}
+                <motion.a
+                  href={googleCalendarUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn-valentine-yes flex items-center justify-center gap-2 text-center no-underline"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Apple className="w-5 h-5" />
+                  Apple Calendar
+                </motion.a>
 
+                {/* Google Calendar Button */}
+                <motion.a
+                  href={googleCalendarUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-6 py-3 rounded-full border-2 border-primary text-primary font-medium hover:bg-primary hover:text-primary-foreground transition-colors flex items-center justify-center gap-2 no-underline"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Calendar className="w-5 h-5" />
+                  Google Calendar
+                </motion.a>
+              </div>
+            </div>
+
+            {/* Share Button */}
+            <div className="flex justify-center">
               <motion.button
                 onClick={handleShare}
-                className="px-6 py-3 rounded-full border-2 border-primary text-primary font-medium hover:bg-primary hover:text-primary-foreground transition-colors flex items-center justify-center gap-2"
+                className="px-6 py-2 rounded-full bg-secondary text-primary font-medium hover:bg-secondary/80 transition-colors flex items-center justify-center gap-2"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <Share2 className="w-5 h-5" />
-                Share
+                <Share2 className="w-4 h-4" />
+                Share Invitation
               </motion.button>
             </div>
           </motion.div>
