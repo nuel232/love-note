@@ -59,40 +59,76 @@ const InvitationCard = ({ isConfirmed }: InvitationCardProps) => {
     ].join(crlf);
 
     const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
-    const file = new File([blob], 'valentines-date.ics', { type: 'text/calendar;charset=utf-8' });
-
-    // Prefer the native share sheet on mobile (often includes "Add to Calendar")
-    try {
-      // iOS Safari can be picky about `navigator.canShare` results for `text/calendar`,
-      // so we try `share()` directly and fall back if it throws.
-      if (navigator.share) {
-        await navigator.share({
-          title: 'Save the date 💕',
-          text: 'Add this to your calendar',
-          files: [file],
-        });
-        return;
-      }
-    } catch {
-      // Fall back to redirect/download below
-    }
 
     const ua = navigator.userAgent;
     const isIOS = /iPhone|iPad|iPod/i.test(ua);
-    const isMobile = /Android|iPhone|iPad|iPod/i.test(ua);
+    const isAndroid = /Android/i.test(ua);
 
-    // iOS fallback: open the .ics directly (Safari then shows "Add to Calendar")
+    // TRY 1: Native Share API (works best on mobile)
+    if (navigator.share && navigator.canShare) {
+      try {
+        const file = new File([blob], 'valentines-date.ics', { type: 'text/calendar;charset=utf-8' });
+        const canShareFiles = navigator.canShare({ files: [file] });
+        
+        if (canShareFiles) {
+          await navigator.share({
+            title: 'Save the date 💕',
+            text: 'Add this to your calendar',
+            files: [file],
+          });
+          return;
+        }
+      } catch (error) {
+        console.log('Share failed, trying fallback:', error);
+        // Continue to fallbacks
+      }
+    }
+
+    // TRY 2: iOS-specific handling
     if (isIOS) {
-      const url = URL.createObjectURL(file);
-      // Must be triggered by a user gesture (this click handler is one)
-      window.location.href = url;
-      // Give Safari time to load it before revoking
-      setTimeout(() => URL.revokeObjectURL(url), 30_000);
+      // Create data URL instead of blob URL for better iOS compatibility
+      const reader = new FileReader();
+      reader.onload = () => {
+        const dataUrl = reader.result as string;
+        
+        // Try opening in new window first (works better on iOS)
+        const newWindow = window.open('', '_blank');
+        if (newWindow) {
+          newWindow.document.write(`
+            <html>
+              <head>
+                <meta charset="utf-8">
+                <title>Add to Calendar</title>
+              </head>
+              <body>
+                <h2>Tap the link below to add to your calendar:</h2>
+                <a href="${dataUrl}" download="valentines-date.ics">Add Valentine's Date to Calendar</a>
+                <script>
+                  // Auto-click the link
+                  setTimeout(() => {
+                    document.querySelector('a').click();
+                  }, 500);
+                </script>
+              </body>
+            </html>
+          `);
+          newWindow.document.close();
+        } else {
+          // If popup blocked, try direct download
+          const link = document.createElement('a');
+          link.href = dataUrl;
+          link.download = 'valentines-date.ics';
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+        }
+      };
+      reader.readAsDataURL(blob);
       return;
     }
 
-    // Mobile fallback: open calendar event creation (Google Calendar deep-link)
-    if (isMobile) {
+    // TRY 3: Android-specific handling (redirect to Google Calendar)
+    if (isAndroid) {
       const googleCalendarUrl =
         'https://calendar.google.com/calendar/render' +
         `?action=TEMPLATE` +
@@ -101,11 +137,11 @@ const InvitationCard = ({ isConfirmed }: InvitationCardProps) => {
         `&location=${encodeURIComponent(event.location)}` +
         `&dates=${encodeURIComponent(`${event.startIcs}/${event.endIcs}`)}`;
 
-      window.location.href = googleCalendarUrl;
+      window.open(googleCalendarUrl, '_blank');
       return;
     }
 
-    // Desktop fallback: download the ICS file
+    // TRY 4: Desktop fallback - download the ICS file
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
     link.download = 'valentines-date.ics';
