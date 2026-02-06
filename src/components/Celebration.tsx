@@ -137,7 +137,7 @@ const Celebration = ({ onComplete }: CelebrationProps) => {
 
           <div className="relative w-32 h-32 md:w-40 md:h-40 mx-auto rounded-full border-4 border-gold overflow-hidden shadow-xl">
     <img 
-      src="public/Screenshot 2026-02-05 235239.png"  // ← Put your glam pic here
+      src="/Screenshot 2026-02-05 235239.png"  // ← Put your glam pic here
       alt="My Stunning Valentine" 
       className="w-full h-full object-cover"
     />

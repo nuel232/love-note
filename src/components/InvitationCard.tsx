@@ -186,7 +186,7 @@ const InvitationCard = ({ isConfirmed }: InvitationCardProps) => {
 >
   <div className="w-24 h-24 rounded-full border-2 border-gold-soft overflow-hidden shadow-lg">
     <img 
-      src="public/Screenshot 2026-02-05 235239.png"
+      src="/Screenshot 2026-02-05 235239.png"
       alt="My Valentine"
       className="w-full h-full object-cover"
     />
