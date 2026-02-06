@@ -59,17 +59,13 @@ const InvitationCard = ({ isConfirmed }: InvitationCardProps) => {
     ].join(crlf);
 
     const blob = new Blob([icsContent], { type: 'text/calendar;charset=utf-8' });
+    const file = new File([blob], 'valentines-date.ics', { type: 'text/calendar;charset=utf-8' });
 
     // Prefer the native share sheet on mobile (often includes "Add to Calendar")
     try {
-      const file = new File([blob], 'valentines-date.ics', { type: 'text/calendar;charset=utf-8' });
-      const canShareFiles =
-        typeof navigator !== 'undefined' &&
-        'canShare' in navigator &&
-        typeof (navigator as Navigator & { canShare?: (data: ShareData) => boolean }).canShare === 'function' &&
-        (navigator as Navigator & { canShare: (data: ShareData) => boolean }).canShare({ files: [file] });
-
-      if (navigator.share && canShareFiles) {
+      // iOS Safari can be picky about `navigator.canShare` results for `text/calendar`,
+      // so we try `share()` directly and fall back if it throws.
+      if (navigator.share) {
         await navigator.share({
           title: 'Save the date 💕',
           text: 'Add this to your calendar',
@@ -81,7 +77,19 @@ const InvitationCard = ({ isConfirmed }: InvitationCardProps) => {
       // Fall back to redirect/download below
     }
 
-    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    const ua = navigator.userAgent;
+    const isIOS = /iPhone|iPad|iPod/i.test(ua);
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(ua);
+
+    // iOS fallback: open the .ics directly (Safari then shows "Add to Calendar")
+    if (isIOS) {
+      const url = URL.createObjectURL(file);
+      // Must be triggered by a user gesture (this click handler is one)
+      window.location.href = url;
+      // Give Safari time to load it before revoking
+      setTimeout(() => URL.revokeObjectURL(url), 30_000);
+      return;
+    }
 
     // Mobile fallback: open calendar event creation (Google Calendar deep-link)
     if (isMobile) {
