@@ -260,28 +260,19 @@ const InvitationCard = ({ isConfirmed }: InvitationCardProps) => {
               </p>
               <div className="flex flex-col sm:flex-row justify-center gap-3">
                 {/* Apple Calendar Button */}
+           
+                {/* Google Calendar Button */}
                 <motion.a
-      href={`data:text/calendar;charset=utf-8,${encodeURIComponent(
-        `BEGIN:VCALENDAR
-VERSION:2.0
-BEGIN:VEVENT
-DTSTART:${formatDateForGoogle(event.startDate)}
-DTEND:${formatDateForGoogle(event.endDate)}
-SUMMARY:${event.title}
-DESCRIPTION:${event.description}
-LOCATION:${event.location}
-END:VEVENT
-END:VCALENDAR`
-      )}`}
-      download="valentine-date.ics"
-      className="btn-valentine-yes flex items-center justify-center gap-2 text-center no-underline"
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-    >
-      <Apple className="w-5 h-5" />
-      Apple Calendar
-    </motion.a>
-              
+                  href={googleCalendarUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="px-6 py-3 rounded-full border-2 border-primary text-primary font-medium hover:bg-primary hover:text-primary-foreground transition-colors flex items-center justify-center gap-2 no-underline"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <Calendar className="w-5 h-5" />
+                   Calendar
+                </motion.a>
               </div>
             </div>
 
