@@ -9,7 +9,7 @@ const MusicToggle = () => {
   useEffect(() => {
     // Create audio element with a romantic instrumental
     audioRef.current = new Audio(
-      'https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3'
+      '/ikeja-shorten.MP3'
     );
     audioRef.current.loop = true;
     audioRef.current.volume = 0.3;
